@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Report interpreter
+        run: python3 -VV
+
+      - name: Compile Python sources
+        id: compile
+        run: python3 -m compileall acl_loop scripts tests
+
+      - name: Run complete verification suite
+        id: suite
+        if: ${{ always() && !cancelled() && (steps.compile.outcome == 'success' || steps.compile.outcome == 'failure') }}
+        run: python3 scripts/run_test_suite.py
+
+      - name: Record matrix evidence summary
+        id: summary
+        if: ${{ always() && !cancelled() }}
+        env:
+          EVIDENCELOOP_PYTHON_VERSION: ${{ matrix.python-version }}
+          EVIDENCELOOP_COMPILE_OUTCOME: ${{ steps.compile.outcome }}
+          EVIDENCELOOP_SUITE_OUTCOME: ${{ steps.suite.outcome }}
+        run: |
+          python3 - <<'PY'
+          from datetime import datetime, timezone
+          import json
+          import os
+          from pathlib import Path
+          import sys
+
+          compile_outcome = os.environ.get("EVIDENCELOOP_COMPILE_OUTCOME", "")
+          suite_outcome = os.environ.get("EVIDENCELOOP_SUITE_OUTCOME", "")
+          result = "PASS" if compile_outcome == suite_outcome == "success" else "FAIL"
+          payload = {
+              "schema_version": "1.0",
+              "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+              "python_matrix_version": os.environ["EVIDENCELOOP_PYTHON_VERSION"],
+              "python_runtime": sys.version,
+              "compile_outcome": compile_outcome,
+              "suite_outcome": suite_outcome,
+              "result": result,
+          }
+          results = Path("tests/results")
+          results.mkdir(parents=True, exist_ok=True)
+          (results / "ci-matrix-summary.json").write_text(
+              json.dumps(payload, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          text = "\n".join(f"{key}={value}" for key, value in payload.items()) + "\n"
+          (results / "ci-matrix-summary.txt").write_text(text, encoding="utf-8")
+          summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary:
+              with Path(summary).open("a", encoding="utf-8") as handle:
+                  handle.write(
+                      f"### EvidenceLoop Python {payload['python_matrix_version']}\n\n"
+                      f"- Result: `{result}`\n"
+                      f"- Compile: `{compile_outcome}`\n"
+                      f"- Suite: `{suite_outcome}`\n"
+                  )
+          print(json.dumps(payload, indent=2))
+          PY
+
+      - name: Upload exact test evidence
+        if: ${{ always() && !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: evidenceloop-python-${{ matrix.python-version }}-evidence
+          path: |
+            tests/results/ci-matrix-summary.json
+            tests/results/ci-matrix-summary.txt
+            tests/results/latest.json
+            tests/results/latest.txt
+          if-no-files-found: error
+          retention-days: 14

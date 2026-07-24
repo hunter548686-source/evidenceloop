@@ -9,6 +9,9 @@ dist/
 .mypy_cache/
 .coverage
 htmlcov/
+.env
+.env.*
+!.env.example
 
 # Local execution state and internal delivery evidence
 .agent/

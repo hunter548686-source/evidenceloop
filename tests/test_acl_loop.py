@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta, timezone
@@ -408,6 +411,572 @@ class CompletionLoopTestCase(unittest.TestCase):
             self.assertTrue((ROOT / relative).exists(), relative)
         for path in (ROOT / "schemas").glob("*.json"):
             json.loads(path.read_text(encoding="utf-8"))
+        gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        self.assertIn(".env", gitignore)
+        self.assertIn(".env.*", gitignore)
+        self.assertIn("!.env.example", gitignore)
+
+    def test_26_github_actions_ci_matrix_contract(self) -> None:
+        workflow_path = ROOT / ".github" / "workflows" / "ci.yml"
+        self.assertTrue(workflow_path.exists())
+        workflow = workflow_path.read_text(encoding="utf-8")
+        required = (
+            'python-version: ["3.11", "3.12", "3.13"]',
+            "fail-fast: false",
+            "permissions:",
+            "contents: read",
+            "persist-credentials: false",
+            "python3 -m compileall acl_loop scripts tests",
+            "python3 scripts/run_test_suite.py",
+            "id: compile",
+            "id: suite",
+            "id: summary",
+            "if: ${{ always() && !cancelled() && (steps.compile.outcome == 'success' || steps.compile.outcome == 'failure') }}",
+            "if: ${{ always() && !cancelled() }}",
+            "EVIDENCELOOP_COMPILE_OUTCOME: ${{ steps.compile.outcome }}",
+            "EVIDENCELOOP_SUITE_OUTCOME: ${{ steps.suite.outcome }}",
+            "GITHUB_STEP_SUMMARY",
+            "tests/results/ci-matrix-summary.json",
+            "tests/results/ci-matrix-summary.txt",
+            "tests/results/latest.json",
+            "tests/results/latest.txt",
+            "evidenceloop-python-${{ matrix.python-version }}-evidence",
+            "if-no-files-found: error",
+            "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+            "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+        )
+        for text in required:
+            self.assertIn(text, workflow)
+        prohibited = (
+            "pull_request_target",
+            "secrets.",
+            "contents: write",
+            "pypi",
+            "twine",
+            "publish",
+            "deploy",
+            "continue-on-error",
+        )
+        lowered = workflow.lower()
+        for text in prohibited:
+            self.assertNotIn(text, lowered)
+        self.assertNotRegex(
+            workflow,
+            r"(?m)^\s+[A-Za-z0-9_-]+:\s*write\s*$",
+        )
+        self.assertNotIn("write-all", lowered)
+        self.assertNotRegex(workflow, r"secrets\s*\[")
+        self.assertNotIn("gh release", lowered)
+
+    def test_27_codex_walkthrough_public_contract(self) -> None:
+        walkthrough_path = ROOT / "docs" / "CODEX_INTEGRATION.md"
+        self.assertTrue(walkthrough_path.exists())
+        walkthrough = walkthrough_path.read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        required = (
+            "disposable",
+            "mktemp -d",
+            "v0.1.0",
+            "autonomous-completion-loop",
+            "$autonomous-completion-loop",
+            "install-project",
+            "validate-state",
+            "TASK_STATE.json",
+            "next_action",
+            ".agent/LOCK.json",
+            "FAILURE_LOG.md",
+            "REPAIRING",
+            "uninstall",
+            "secret",
+            'PYTHONPATH="../evidenceloop"',
+            "python3 -B -m unittest",
+            "pause the active Codex run",
+            '"valid": false',
+            'LOCK_STATUS_JSON="$lock_status"',
+            "Refusing uninstall: pause writers and clear the active lock first.",
+            "raise SystemExit(1)",
+            "trap release_rollback_lock EXIT",
+            '--operation "rollback-uninstall"',
+            "rollback_lock_acquired=true",
+            "Scheduled Tasks are optional",
+            "a ChatGPT web task cannot access the local folder",
+            "AUTOMATION_SETUP_REQUIRED",
+            "A green CI run proves only",
+        )
+        for text in required:
+            self.assertIn(text, walkthrough)
+        self.assertIn("[Codex integration walkthrough](docs/CODEX_INTEGRATION.md)", readme)
+        self.assertIn(
+            "Codex Skill integration and optional Scheduled Task setup guidance",
+            readme,
+        )
+        self.assertIn("A green CI run proves only", readme)
+        self.assertIn("does not prove output quality", readme)
+        self.assertNotIn("EVIDENCELOOP_HOME", walkthrough)
+        rollback_section = walkthrough.split("## 7. Rollback", 1)[1].split(
+            "## 8. Optional Scheduled Tasks",
+            1,
+        )[0]
+        self.assertLess(
+            rollback_section.index("raise SystemExit(1)"),
+            rollback_section.index("python3 -m acl_loop.cli uninstall"),
+        )
+        self.assertLess(
+            rollback_section.index('lock --project "$DEMO" acquire'),
+            rollback_section.index("python3 -m acl_loop.cli uninstall"),
+        )
+        self.assertLess(
+            rollback_section.index("python3 -m acl_loop.cli uninstall"),
+            rollback_section.rindex('lock --project "$DEMO" release'),
+        )
+
+        for target in re.findall(r"\[[^]]+\]\(([^)]+)\)", walkthrough):
+            if target.startswith(("https://", "http://", "#")):
+                continue
+            relative = target.split("#", 1)[0]
+            self.assertTrue((walkthrough_path.parent / relative).exists(), target)
+
+    def test_28_codex_walkthrough_cli_flow(self) -> None:
+        cli_environment = os.environ.copy()
+        cli_environment["PYTHONNOUSERSITE"] = "1"
+        cli_environment["PYTHONDONTWRITEBYTECODE"] = "1"
+        cli_environment["PYTHONPATH"] = str(ROOT)
+
+        def run_cli(*arguments: str) -> dict[str, object]:
+            completed = subprocess.run(
+                [sys.executable, "-m", "acl_loop.cli", *arguments],
+                cwd=self.temp_path,
+                env=cli_environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
+            payload = json.loads(completed.stdout)
+            self.assertTrue(payload.get("ok"), payload)
+            return payload
+
+        tests_dir = self.temp_path / "tests"
+        tests_dir.mkdir()
+        (self.temp_path / ".gitignore").write_text(
+            ".agent/\n.env\n.env.*\n__pycache__/\n",
+            encoding="utf-8",
+        )
+        (self.temp_path / ".env").write_text(
+            "SYNTHETIC_DO_NOT_READ_MARKER=walkthrough-test\n",
+            encoding="utf-8",
+        )
+        answer = self.temp_path / "answer.py"
+        answer.write_text("def answer() -> int:\n    return 1\n", encoding="utf-8")
+        (tests_dir / "test_answer.py").write_text(
+            "import unittest\n"
+            "from answer import answer\n\n"
+            "class AnswerTest(unittest.TestCase):\n"
+            "    def test_answer(self) -> None:\n"
+            "        self.assertEqual(answer(), 2)\n",
+            encoding="utf-8",
+        )
+        staged = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(self.temp_path),
+                "add",
+                ".gitignore",
+                "answer.py",
+                "tests/test_answer.py",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(staged.returncode, 0, staged.stderr)
+        committed = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(self.temp_path),
+                "-c",
+                "user.name=EvidenceLoop walkthrough",
+                "-c",
+                "user.email=walkthrough@example.invalid",
+                "commit",
+                "-m",
+                "Create disposable failing fixture",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(committed.returncode, 0, committed.stderr)
+        baseline_head = subprocess.run(
+            ["git", "-C", str(self.temp_path), "rev-parse", "HEAD"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(baseline_head.returncode, 0, baseline_head.stderr)
+        baseline_commit = baseline_head.stdout.strip()
+
+        acceptance_command = [
+            sys.executable,
+            "-B",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "tests",
+            "-v",
+        ]
+        initial = subprocess.run(
+            acceptance_command,
+            cwd=self.temp_path,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertNotEqual(initial.returncode, 0)
+
+        install = run_cli(
+            "install-project",
+            "--project",
+            str(self.temp_path),
+            "--goal",
+            "Repair the disposable failing test and preserve evidence.",
+        )
+        self.assertFalse(install["business_code_modified"])
+        validation = run_cli("validate-state", "--project", str(self.temp_path))
+        self.assertEqual(validation["errors"], [])
+        skill = (
+            self.temp_path
+            / ".agents"
+            / "skills"
+            / "autonomous-completion-loop"
+            / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("name: autonomous-completion-loop", skill)
+
+        run_id = "walkthrough-contract-run"
+        acquired = run_cli(
+            "lock",
+            "--project",
+            str(self.temp_path),
+            "acquire",
+            "--owner",
+            "walkthrough-contract-test",
+            "--operation",
+            "failure-repair-flow",
+            "--ttl-minutes",
+            "10",
+            "--run-id",
+            run_id,
+        )
+        self.assertEqual(acquired["run_id"], run_id)
+        active_lock = run_cli("lock", "--project", str(self.temp_path), "status")
+        self.assertTrue(active_lock["valid"])
+
+        transitions = (
+            ("INSPECTING", "Inspect the disposable repository."),
+            ("PLANNING", "Select the minimum repair."),
+            ("EXECUTING", "Apply the bounded repair."),
+            ("VERIFYING", "Run the original acceptance command."),
+        )
+        for target, reason in transitions:
+            run_cli(
+                "transition",
+                "--project",
+                str(self.temp_path),
+                "--to",
+                target,
+                "--reason",
+                reason,
+            )
+
+        failed = run_cli(
+            "record-failure",
+            "--project",
+            str(self.temp_path),
+            "--category",
+            "测试错误",
+            "--strategy",
+            "disposable-answer-repair-v1",
+            "--error",
+            "Synthetic assertion expected 2 but received 1.",
+            "--root-cause-hypothesis",
+            "The disposable answer fixture returns the intentionally wrong value.",
+            "--experiment",
+            "Change only the fixture return value and rerun the same unittest command.",
+            "--repair",
+            "Return 2 from answer().",
+        )
+        self.assertEqual(failed["status"], "REPAIRING")
+
+        answer.write_text(
+            "def answer() -> int:\n    return 2  # repaired fixture\n",
+            encoding="utf-8",
+        )
+        repaired = subprocess.run(
+            acceptance_command,
+            cwd=self.temp_path,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(repaired.returncode, 0, repaired.stderr)
+
+        run_cli(
+            "transition",
+            "--project",
+            str(self.temp_path),
+            "--to",
+            "VERIFYING",
+            "--reason",
+            "The minimum repair passed the original acceptance command.",
+        )
+        validation_before_done = run_cli(
+            "validate-state",
+            "--project",
+            str(self.temp_path),
+        )
+        inspection = run_cli("inspect", "--project", str(self.temp_path))
+        agents = (self.temp_path / "AGENTS.md").read_text(encoding="utf-8")
+        failure_log = (
+            self.temp_path / ".agent" / "FAILURE_LOG.md"
+        ).read_text(encoding="utf-8")
+        progress = (
+            self.temp_path / ".agent" / "PROGRESS.md"
+        ).read_text(encoding="utf-8")
+        post_repair_head = subprocess.run(
+            ["git", "-C", str(self.temp_path), "rev-parse", "HEAD"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(post_repair_head.returncode, 0, post_repair_head.stderr)
+        remotes = subprocess.run(
+            ["git", "-C", str(self.temp_path), "remote"],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(remotes.returncode, 0, remotes.stderr)
+        top_level = {
+            item["name"]: item
+            for item in inspection["top_level"]
+            if isinstance(item, dict) and "name" in item
+        }
+        inspection_text = json.dumps(inspection, ensure_ascii=False)
+        self.assertNotIn("walkthrough-test", inspection_text)
+        command_evidence = (
+            self.temp_path
+            / ".agent"
+            / "EVIDENCE"
+            / "walkthrough-command-evidence.json"
+        )
+        core.atomic_write_json(
+            command_evidence,
+            {
+                "schema_version": "1.0",
+                "acceptance_command": acceptance_command,
+                "initial": {
+                    "exit_code": initial.returncode,
+                    "stdout": initial.stdout,
+                    "stderr": initial.stderr,
+                },
+                "repaired": {
+                    "exit_code": repaired.returncode,
+                    "stdout": repaired.stdout,
+                    "stderr": repaired.stderr,
+                },
+                "secret_file_contents_read": inspection["security"][
+                    "secret_file_contents_read"
+                ],
+                "lock_run_id": run_id,
+            },
+        )
+        saved_command_evidence = json.loads(
+            command_evidence.read_text(encoding="utf-8")
+        )
+        self.assertNotEqual(saved_command_evidence["initial"]["exit_code"], 0)
+        self.assertEqual(saved_command_evidence["repaired"]["exit_code"], 0)
+        acceptance_checks = {
+            "state_schema_valid": validation_before_done["errors"] == [],
+            "project_skill_installed": (
+                self.temp_path
+                / ".agents"
+                / "skills"
+                / "autonomous-completion-loop"
+                / "SKILL.md"
+            ).exists(),
+            "managed_agents_block_valid": (
+                agents.count(core.MANAGED_START) == 1
+                and agents.count(core.MANAGED_END) == 1
+            ),
+            "security_boundaries_verified": (
+                inspection["security"]["secret_file_contents_read"] is False
+                and top_level[".env"]["content_read"] is False
+                and "walkthrough-test" not in inspection_text
+                and post_repair_head.stdout.strip() == baseline_commit
+                and remotes.stdout.strip() == ""
+            ),
+            "relevant_tests_passed": repaired.returncode == 0,
+            "evidence_complete": (
+                command_evidence.exists()
+                and "disposable-answer-repair-v1" in failure_log
+                and "VERIFYING" in progress
+            ),
+        }
+        self.assertEqual(
+            set(acceptance_checks),
+            set(core.MANDATORY_ACCEPTANCE),
+        )
+        done_arguments = [
+            "transition",
+            "--project",
+            str(self.temp_path),
+            "--to",
+            "DONE",
+            "--reason",
+            "Every synthetic walkthrough acceptance check passed.",
+        ]
+        for name in sorted(acceptance_checks):
+            self.assertTrue(acceptance_checks[name], name)
+            if acceptance_checks[name]:
+                done_arguments.extend(["--accept", name])
+        done = run_cli(*done_arguments)
+        self.assertEqual(done["status"], "DONE")
+
+        released = run_cli(
+            "lock",
+            "--project",
+            str(self.temp_path),
+            "release",
+            "--run-id",
+            run_id,
+        )
+        self.assertTrue(released["released"])
+        final_fingerprint = tree_fingerprint(self.temp_path)
+        final_validation = run_cli("validate-state", "--project", str(self.temp_path))
+        self.assertEqual(final_validation["errors"], [])
+        acceptance = run_cli("acceptance", "--project", str(self.temp_path))
+        self.assertTrue(acceptance["passed"])
+        next_action = run_cli("next-action", "--project", str(self.temp_path))
+        self.assertIn("READ_ONLY", str(next_action["next_action"]))
+        final_lock = run_cli("lock", "--project", str(self.temp_path), "status")
+        self.assertFalse(final_lock["valid"])
+        final_test = subprocess.run(
+            acceptance_command,
+            cwd=self.temp_path,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(final_test.returncode, 0, final_test.stderr)
+        self.assertEqual(tree_fingerprint(self.temp_path), final_fingerprint)
+        self.assertIn("disposable-answer-repair-v1", failure_log)
+
+        rollback_record: dict[str, object]
+        with tempfile.TemporaryDirectory(prefix="acl-loop-rollback-test-") as temporary:
+            rollback_project = Path(temporary)
+            rollback_record = {
+                "path": str(rollback_project),
+                "created": True,
+                "cleaned": False,
+            }
+            rollback_git = subprocess.run(
+                ["git", "init", "-q", str(rollback_project)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(rollback_git.returncode, 0, rollback_git.stderr)
+            user_file = rollback_project / "user.txt"
+            user_file.write_text("preserve me\n", encoding="utf-8")
+            run_cli(
+                "install-project",
+                "--project",
+                str(rollback_project),
+                "--goal",
+                "Validate rollback without removing user files or evidence.",
+            )
+            rollback_lock = run_cli(
+                "lock",
+                "--project",
+                str(rollback_project),
+                "status",
+            )
+            self.assertFalse(rollback_lock["valid"])
+            rollback_run_id = "walkthrough-rollback-run"
+            rollback_acquire = run_cli(
+                "lock",
+                "--project",
+                str(rollback_project),
+                "acquire",
+                "--owner",
+                "walkthrough-rollback-test",
+                "--operation",
+                "rollback-uninstall",
+                "--ttl-minutes",
+                "10",
+                "--run-id",
+                rollback_run_id,
+            )
+            self.assertEqual(rollback_acquire["run_id"], rollback_run_id)
+            owned_rollback_lock = run_cli(
+                "lock",
+                "--project",
+                str(rollback_project),
+                "status",
+            )
+            self.assertTrue(owned_rollback_lock["valid"])
+            self.assertEqual(
+                owned_rollback_lock["data"]["run_id"],
+                rollback_run_id,
+            )
+            uninstall = run_cli(
+                "uninstall",
+                "--project",
+                str(rollback_project),
+            )
+            self.assertTrue(uninstall["user_files_preserved"])
+            rollback_release = run_cli(
+                "lock",
+                "--project",
+                str(rollback_project),
+                "release",
+                "--run-id",
+                rollback_run_id,
+            )
+            self.assertTrue(rollback_release["released"])
+            released_rollback_lock = run_cli(
+                "lock",
+                "--project",
+                str(rollback_project),
+                "status",
+            )
+            self.assertFalse(released_rollback_lock["valid"])
+            self.assertEqual(released_rollback_lock["data"]["run_id"], "")
+            self.assertTrue(user_file.exists())
+            self.assertTrue(
+                (rollback_project / ".agent" / "TASK_STATE.json").exists()
+            )
+            self.assertFalse(
+                (
+                    rollback_project
+                    / ".agents"
+                    / "skills"
+                    / "autonomous-completion-loop"
+                ).exists()
+            )
+            rollback_agents = rollback_project / "AGENTS.md"
+            self.assertNotIn(
+                core.MANAGED_START,
+                rollback_agents.read_text(encoding="utf-8"),
+            )
+            rollback_record["verified"] = True
+        rollback_record["cleaned"] = not Path(str(rollback_record["path"])).exists()
+        self.record["rollback_demo"] = rollback_record
 
 
 if __name__ == "__main__":

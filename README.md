@@ -46,7 +46,7 @@ and only when every mandatory acceptance item passes.
 - Idempotent project installation and conservative uninstall.
 - Secret-safe project inspection.
 - Resumable execution through project-local `.agent/` state.
-- Codex Skill and Scheduled Task integration.
+- Codex Skill integration and optional Scheduled Task setup guidance.
 - Automated conformance-oriented test suite.
 
 ## Quick start
@@ -122,6 +122,8 @@ git status --short
 
 The test suite covers installation, state transitions, acceptance gates, retries, source validation, locking, interruption recovery, terminal-state behavior, uninstall safety, and secret-safe inspection.
 
+The CI matrix is configured for Python 3.11, 3.12, and 3.13. Each non-cancelled job is configured to record a JSON and text outcome summary, and to upload the full test evidence whenever the suite starts. A green CI run proves only that these commands passed in the listed jobs. It does not prove output quality, production readiness, security certification, adoption, or external users.
+
 ## Project status
 
 Version 0.1.0 is the initial public release. EvidenceLoop is early-stage and maintainer-led. No public adoption, package-registry downloads, external-user count, or ecosystem usage is claimed.
@@ -130,6 +132,7 @@ Version 0.1.0 is the initial public release. EvidenceLoop is early-stage and mai
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Installation](docs/INSTALLATION.md)
+- [Codex integration walkthrough](docs/CODEX_INTEGRATION.md)
 - [Usage](docs/USAGE.md)
 - [State machine](docs/STATE_MACHINE.md)
 - [Research protocol](docs/RESEARCH_PROTOCOL.md)
