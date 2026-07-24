@@ -1,66 +1,76 @@
-# Codex for Open Source — Application Draft
+# Codex for Open Source — EvidenceLoop Application Draft
 
-Official program page: https://openai.com/form/codex-for-oss/
+Official application: https://openai.com/form/codex-for-oss/
 
-Do not submit until the repository is public and the factual fields below have been verified.
+Verified on 2026-07-24. Do not submit until every `OWNER_INPUT_REQUIRED` field is supplied by the project owner.
 
-## Required owner-supplied fields
+## Verified public facts
 
-- First name
-- Last name
-- Email associated with the applicant's ChatGPT account
-- Public GitHub username
-- Public EvidenceLoop repository URL
-- OpenAI Organization ID
+- GitHub username: `hunter548686-source`
+- Public repository: https://github.com/hunter548686-source/evidenceloop
+- v0.1.0 release: https://github.com/hunter548686-source/evidenceloop/releases/tag/v0.1.0
+- License: Apache-2.0
+- Current automated test suite: 25 tests; 25/25 passed for the v0.1.0 release candidate
+- Current maintenance state: public v0.1.0 initial release, maintainer-led governance, public roadmap, and active issue triage
+- Current open Issue count: 5
+- Issue provenance: all five are maintainer-created roadmap tasks, not external-user feedback
+- PyPI status: not published
+- Adoption status: no stars, downloads, external users, or ecosystem adoption are claimed in this application
+
+## Owner-supplied fields
+
+- First name: `OWNER_INPUT_REQUIRED`
+- Last name: `OWNER_INPUT_REQUIRED`
+- Email associated with the applicant's ChatGPT account: `OWNER_INPUT_REQUIRED`
+- OpenAI Organization ID: `OWNER_INPUT_REQUIRED`
+
+## GitHub fields
+
+- GitHub username: `hunter548686-source`
+- GitHub repository URL: `https://github.com/hunter548686-source/evidenceloop`
 
 ## Role
 
-**Primary maintainer**
+Select: **Primary maintainer**
 
-Draft response:
+Evidence-backed draft:
 
-> I am the primary maintainer and project owner. I designed the state machine, evidence model, safety boundaries, recovery protocol, installation workflow, and test suite, and I am responsible for issue triage, releases, documentation, compatibility, and security maintenance.
+> I am the project owner and primary maintainer. I am responsible for EvidenceLoop's state model, evidence protocol, safety boundaries, release management, issue triage, documentation, compatibility, and security maintenance.
 
-## Why the repository qualifies
+## Why does this repository qualify?
 
-Maximum allowed by the form: 500 characters.
+411 characters; form limit: 500.
 
-Draft:
-
-> EvidenceLoop provides an agent-independent, fail-closed verification layer for coding agents. It standardizes legal completion states, acceptance evidence, source provenance, failure escalation, recovery, locking, and reproducible completion records across Codex and other agent workflows. It addresses a growing ecosystem need: independently proving that agent-produced software work is actually complete.
-
-Do not add stars, downloads, installations, users, issues, pull requests, or release claims unless they are real and visible at submission time.
+> EvidenceLoop is an agent-independent, fail-closed evidence and conformance protocol for coding agents. It makes DONE acceptance-gated and records command evidence, source provenance, failure escalation, locking, and recovery across Codex and other agent workflows. Public v0.1.0 includes a standard-library Python runtime, a Codex-compatible Skill, 25 passing tests, and an active five-issue maintainer roadmap.
 
 ## Requested support
 
-- API credits for the project
-- Codex Security only if the repository and program review show that it is applicable
+- API credits for the project: **Yes**
+- Codex Security: **Not selected in the current recommendation; owner may reconsider if the project's security-review scope materially expands**
 
-## API-credit use
+## OpenAI Organization ID
 
-Maximum allowed by the form: 500 characters.
+`OWNER_INPUT_REQUIRED`
 
-Draft:
+## How will you use API credits for your project?
 
-> We will use API credits to maintain Codex adapters, reproduce community issues, evaluate agent behavior against adversarial completion cases, review contributions, generate regression fixtures, and run public conformance tests across real open-source repositories. The results will improve evidence quality, safety boundaries, release checks, and interoperability for maintainers using coding agents.
+435 characters; form limit: 500.
 
-## Anything else
+> We will use API credits to maintain Codex integrations; reproduce reported failures in disposable repositories; evaluate agents against adversarial completion cases; review contributions; and build public regression and conformance fixtures. Results will be documented in issues, tests, and releases to improve evidence quality, failure recovery, safety boundaries, and interoperability for open-source maintainers using coding agents.
 
-Maximum allowed by the form: 500 characters.
+## Anything else we should know?
 
-Draft:
+441 characters; form limit: 500.
 
-> EvidenceLoop is intentionally not another coding agent or orchestrator. It is a portable proof layer that can complement Codex, CI systems, and other agent harnesses. The initial implementation uses only the Python standard library and includes automated tests for fail-closed completion, secret-safe inspection, interruption recovery, source validation, locking, and invalid state transitions.
+> EvidenceLoop is not another coding agent or orchestrator. It is a portable proof layer that can complement Codex, CI systems, and other agent harnesses. The v0.1.0 runtime has no third-party runtime dependencies and tests fail-closed completion, secret-safe inspection, interruption recovery, source validation, locking, and illegal transitions. This is a new project; we are not claiming stars, downloads, external users, or broad adoption.
 
 ## Submission gate
 
-Submit only when all are true:
+Do not submit until all are true:
 
-- repository is public;
-- repository URL is confirmed;
-- GitHub profile is public;
-- first release or visible maintenance activity exists;
-- README and license render correctly;
-- all tests pass from the public repository checkout;
-- no private paths, credentials, customer data, or unsupported adoption claims remain;
-- OpenAI Organization ID is supplied by the owner.
+- every `OWNER_INPUT_REQUIRED` field is supplied and checked by the owner;
+- the owner confirms the ChatGPT-account email and OpenAI Organization ID;
+- the GitHub profile remains public;
+- the repository and release remain public;
+- no unsupported adoption metric is added;
+- the owner reviews the current recommendation in `OPENAI_APPLICATION_READY.md`.
