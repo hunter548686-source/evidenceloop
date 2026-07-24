@@ -10,7 +10,7 @@ EvidenceLoop v0.1.0 is the initial public release of a fail-closed evidence and 
 - Command evidence, external-source validation, freshness records, and research provenance.
 - Failure fingerprinting, repair, strategy retirement, replanning, and bounded `BLOCKED` behavior.
 - Process-aware project locks, interruption recovery, resumable `next_action`, and completed-run archives.
-- A Python 3.11+ runtime with no third-party runtime dependencies.
+- A standard-library-only Python 3.11+ runtime with no third-party runtime dependencies.
 - A Codex-compatible Skill distributed under the compatibility identifier `autonomous-completion-loop`.
 - Project installation, conservative uninstall, templates, schemas, policies, examples, and security documentation.
 
