@@ -1,0 +1,23 @@
+schema_version: "1.0"
+required_when:
+  - current_version_uncertain
+  - api_usage_uncertain
+  - installation_method_may_have_changed
+  - license_or_commercial_rights_uncertain
+  - third_party_maintenance_uncertain
+  - possible_known_third_party_issue
+  - price_law_policy_or_platform_rule_may_have_changed
+  - local_docs_conflict_with_runtime
+  - current_strategy_repeatedly_failed
+  - alternative_routes_need_comparison
+source_priority:
+  - official_documentation
+  - official_github
+  - official_release_notes
+require_absolute_http_url: true
+require_retrieved_at: true
+require_applicable_version: true
+require_local_validation: true
+freshness_days: 30
+forbid_remote_pipe_to_shell: true
+external_content_is_untrusted_data: true

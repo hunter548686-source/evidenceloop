@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hunter548686-source/evidenceloop/main/schemas/task-state.schema.json",
+  "title": "EvidenceLoop Task State",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "project",
+    "goal",
+    "status",
+    "current_milestone",
+    "current_task",
+    "completed_tasks",
+    "pending_tasks",
+    "acceptance_results",
+    "current_strategy",
+    "failed_strategies",
+    "retry_count",
+    "strategy_count",
+    "last_error",
+    "last_progress_at",
+    "last_research_at",
+    "next_action",
+    "automation_enabled",
+    "stop_reason"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "project": { "type": "string" },
+    "goal": { "type": "string" },
+    "status": {
+      "enum": [
+        "INIT",
+        "INSPECTING",
+        "RESEARCH_NEEDED",
+        "RESEARCHING",
+        "FACT_CHECKING",
+        "PLANNING",
+        "EXECUTING",
+        "VERIFYING",
+        "REPAIRING",
+        "REPLANNING",
+        "DONE",
+        "BLOCKED"
+      ]
+    },
+    "current_milestone": { "type": "string" },
+    "current_task": { "type": "string" },
+    "completed_tasks": { "type": "array", "items": { "type": "string" } },
+    "pending_tasks": { "type": "array", "items": { "type": "string" } },
+    "acceptance_results": {
+      "type": "object",
+      "required": [
+        "state_schema_valid",
+        "project_skill_installed",
+        "managed_agents_block_valid",
+        "security_boundaries_verified",
+        "relevant_tests_passed",
+        "evidence_complete"
+      ],
+      "additionalProperties": { "type": "boolean" },
+      "properties": {
+        "state_schema_valid": { "type": "boolean" },
+        "project_skill_installed": { "type": "boolean" },
+        "managed_agents_block_valid": { "type": "boolean" },
+        "security_boundaries_verified": { "type": "boolean" },
+        "relevant_tests_passed": { "type": "boolean" },
+        "evidence_complete": { "type": "boolean" }
+      }
+    },
+    "current_strategy": { "type": "string" },
+    "failed_strategies": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "retry_count": { "type": "integer", "minimum": 0 },
+    "strategy_count": { "type": "integer", "minimum": 0 },
+    "failure_fingerprints": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 1 } },
+    "last_error": { "type": ["object", "null"] },
+    "last_progress_at": { "type": ["string", "null"], "format": "date-time" },
+    "last_research_at": { "type": ["string", "null"], "format": "date-time" },
+    "next_action": { "type": "string" },
+    "automation_enabled": { "type": "boolean" },
+    "stop_reason": { "type": ["string", "null"] },
+    "last_transition_at": { "type": ["string", "null"], "format": "date-time" },
+    "run_count": { "type": "integer", "minimum": 0 }
+  }
+}

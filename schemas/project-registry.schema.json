@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hunter548686-source/evidenceloop/main/schemas/project-registry.schema.json",
+  "title": "Completion Loop Project Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "projects"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "canonical_path", "goal", "state_path", "skill_path", "enabled"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "canonical_path": { "type": "string", "minLength": 1 },
+          "goal": { "type": "string", "minLength": 1 },
+          "state_path": { "const": ".agent/TASK_STATE.json" },
+          "skill_path": { "const": ".agents/skills/autonomous-completion-loop" },
+          "enabled": { "type": "boolean" },
+          "installed_at": { "type": ["string", "null"], "format": "date-time" },
+          "last_verified_at": { "type": ["string", "null"], "format": "date-time" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

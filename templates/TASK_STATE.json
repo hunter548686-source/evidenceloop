@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "project": "",
+  "goal": "",
+  "status": "INIT",
+  "current_milestone": "installation",
+  "current_task": "inspect real project state",
+  "completed_tasks": [],
+  "pending_tasks": [
+    "inspect real project state",
+    "verify installation",
+    "run acceptance"
+  ],
+  "acceptance_results": {
+    "state_schema_valid": false,
+    "project_skill_installed": false,
+    "managed_agents_block_valid": false,
+    "security_boundaries_verified": false,
+    "relevant_tests_passed": false,
+    "evidence_complete": false
+  },
+  "current_strategy": "inspect-first",
+  "failed_strategies": [],
+  "retry_count": 0,
+  "strategy_count": 0,
+  "failure_fingerprints": {},
+  "last_error": null,
+  "last_progress_at": null,
+  "last_research_at": null,
+  "next_action": "Inspect Git, files, dependencies, runtime, and existing claims without reading secrets.",
+  "automation_enabled": true,
+  "stop_reason": null,
+  "last_transition_at": null,
+  "run_count": 0
+}

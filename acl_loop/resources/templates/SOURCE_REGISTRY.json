@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "question": "What is the current Codex Skill format and discovery path?",
+      "claim": "A Skill is a directory with a required SKILL.md containing name and description; Codex discovers user Skills under $HOME/.agents/skills and repository Skills under .agents/skills, and supports explicit and description-based invocation.",
+      "source_title": "Build skills",
+      "source_url": "https://learn.chatgpt.com/docs/build-skills",
+      "publisher": "OpenAI",
+      "source_type": "official_documentation",
+      "published_at": null,
+      "retrieved_at": "2026-07-23T05:20:00+10:00",
+      "applicable_version": "Codex documentation as retrieved 2026-07-23",
+      "evidence_summary": "The official guide defines the required SKILL.md front matter, optional scripts/references/assets, discovery scopes, and explicit or implicit invocation.",
+      "confidence": "high",
+      "local_validation": "passed",
+      "limitations": "The documentation can change; refresh when the source exceeds the configured freshness window."
+    },
+    {
+      "question": "How does Codex load AGENTS.md instructions?",
+      "claim": "Codex loads user-level and project-level AGENTS.md instructions before work, with more specific project instructions taking precedence.",
+      "source_title": "AGENTS.md",
+      "source_url": "https://learn.chatgpt.com/docs/agent-configuration/agents-md",
+      "publisher": "OpenAI",
+      "source_type": "official_documentation",
+      "published_at": null,
+      "retrieved_at": "2026-07-23T05:20:00+10:00",
+      "applicable_version": "Codex documentation as retrieved 2026-07-23",
+      "evidence_summary": "The official page describes global and repository instruction discovery and precedence.",
+      "confidence": "high",
+      "local_validation": "passed",
+      "limitations": "Instruction-size and fallback settings may vary by local Codex configuration."
+    },
+    {
+      "question": "What are the current Codex Scheduled Task capabilities and limits?",
+      "claim": "Local-project Scheduled Tasks are managed in ChatGPT web or the Codex desktop app rather than CLI/IDE; local runs require the machine to be on and the desktop app running, while web tasks cannot access local folders.",
+      "source_title": "Automations",
+      "source_url": "https://learn.chatgpt.com/docs/automations",
+      "publisher": "OpenAI",
+      "source_type": "official_documentation",
+      "published_at": null,
+      "retrieved_at": "2026-07-23T05:20:00+10:00",
+      "applicable_version": "Codex Scheduled Tasks documentation as retrieved 2026-07-23",
+      "evidence_summary": "The official guide distinguishes local and web tasks, supported management surfaces, project directories, worktrees, and machine/app availability requirements.",
+      "confidence": "high",
+      "local_validation": "passed",
+      "limitations": "No supported local CLI management command was available in this machine's PATH, so task creation still requires the official UI."
+    },
+    {
+      "question": "Can one persistent worktree be assumed across scheduled runs?",
+      "claim": "Codex desktop can create dedicated background worktrees for tasks, but a long-lived identical worktree should not be assumed as a stable cross-run state authority; project-local state and locks are safer.",
+      "source_title": "Git worktrees",
+      "source_url": "https://learn.chatgpt.com/docs/environments/git-worktrees",
+      "publisher": "OpenAI",
+      "source_type": "official_documentation",
+      "published_at": null,
+      "retrieved_at": "2026-07-23T05:20:00+10:00",
+      "applicable_version": "Codex desktop documentation as retrieved 2026-07-23",
+      "evidence_summary": "The official page explains desktop-created worktrees, task isolation, detached worktree behavior, and transfer between environments.",
+      "confidence": "high",
+      "local_validation": "passed",
+      "limitations": "This conclusion is a conservative implementation inference from documented worktree isolation, not a promise that every future scheduler version creates a new worktree."
+    },
+    {
+      "question": "What is the official open-source Codex repository?",
+      "claim": "OpenAI maintains the official Codex repository on GitHub under openai/codex.",
+      "source_title": "openai/codex",
+      "source_url": "https://github.com/openai/codex",
+      "publisher": "OpenAI",
+      "source_type": "official_github_repository",
+      "published_at": null,
+      "retrieved_at": "2026-07-23T05:20:00+10:00",
+      "applicable_version": "repository state as retrieved 2026-07-23",
+      "evidence_summary": "The official repository is retained as a version and implementation reference; no remote script was piped into a shell.",
+      "confidence": "high",
+      "local_validation": "passed",
+      "limitations": "Repository contents evolve; inspect a pinned revision before adopting implementation details."
+    }
+  ]
+}

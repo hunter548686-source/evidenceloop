@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a focused EvidenceLoop improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        EvidenceLoop favors small, verifiable changes that preserve fail-closed behavior and portability.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What verification, evidence, interoperability, or maintainer problem needs to be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior and how it could be accepted.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Optional implementation or protocol ideas.
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and safety
+      description: Note schema, CLI, dependency, network, telemetry, secret-handling, or migration effects.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: This request does not depend on weakening acceptance gates or fail-closed behavior.
+          required: true
+        - label: I checked the roadmap and existing issues for related work.
+          required: true

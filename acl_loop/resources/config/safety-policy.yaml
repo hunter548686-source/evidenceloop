@@ -1,0 +1,25 @@
+schema_version: "1.0"
+prohibited:
+  - read_or_display_secrets
+  - expose_api_keys
+  - git_commit
+  - git_push
+  - git_merge
+  - publish_release
+  - production_deploy
+  - paid_purchase
+  - delete_user_data
+  - irreversible_database_operation
+  - modify_important_system_files_outside_authorized_paths
+  - lower_operating_system_security
+allowed:
+  - read_and_write_within_authorized_project
+  - run_tests_lint_typecheck_build
+  - create_disposable_test_repository_or_worktree
+  - search_public_sources
+  - download_then_audit_public_source
+  - create_local_reports_and_candidate_diffs
+inspection:
+  read_secret_contents: false
+  collect_file_metadata: true
+  collect_git_status: true

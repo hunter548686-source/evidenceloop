@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "projects": [
+    {
+      "name": "Example Project",
+      "canonical_path": "/absolute/path/to/example-project",
+      "goal": "Complete one evidence-backed local goal.",
+      "state_path": ".agent/TASK_STATE.json",
+      "skill_path": ".agents/skills/autonomous-completion-loop",
+      "enabled": true,
+      "installed_at": "2026-07-23T00:00:00+10:00",
+      "last_verified_at": null,
+      "notes": "Do not place secrets in the registry."
+    }
+  ]
+}

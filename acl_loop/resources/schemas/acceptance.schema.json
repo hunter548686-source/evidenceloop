@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hunter548686-source/evidenceloop/main/schemas/acceptance.schema.json",
+  "title": "Completion Loop Acceptance Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "project", "checked_at", "results", "passed", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "project": { "type": "string", "minLength": 1 },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "results": {
+      "type": "object",
+      "required": [
+        "state_schema_valid",
+        "project_skill_installed",
+        "managed_agents_block_valid",
+        "security_boundaries_verified",
+        "relevant_tests_passed",
+        "evidence_complete"
+      ],
+      "additionalProperties": { "type": "boolean" },
+      "properties": {
+        "state_schema_valid": { "type": "boolean" },
+        "project_skill_installed": { "type": "boolean" },
+        "managed_agents_block_valid": { "type": "boolean" },
+        "security_boundaries_verified": { "type": "boolean" },
+        "relevant_tests_passed": { "type": "boolean" },
+        "evidence_complete": { "type": "boolean" }
+      }
+    },
+    "passed": { "type": "boolean" },
+    "evidence": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "limitations": { "type": "array", "items": { "type": "string" } }
+  }
+}

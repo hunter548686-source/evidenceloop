@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local execution state and internal delivery evidence
+.agent/
+.pbos/
+tests/results/
+/FINAL_HANDOFF.md
+docs/blueprint/
+docs/DELIVERY_FILE_INVENTORY.md

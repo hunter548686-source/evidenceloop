@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evidenceloop"
+version = "0.1.0"
+description = "A fail-closed evidence and conformance protocol for coding agents."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "EvidenceLoop contributors" }]
+keywords = ["coding-agents", "verification", "evidence", "codex", "automation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hunter548686-source/evidenceloop"
+Repository = "https://github.com/hunter548686-source/evidenceloop"
+Issues = "https://github.com/hunter548686-source/evidenceloop/issues"
+Changelog = "https://github.com/hunter548686-source/evidenceloop/blob/main/CHANGELOG.md"
+
+[project.scripts]
+evidenceloop = "acl_loop.cli:main"
+acl-loop = "acl_loop.cli:main"
+
+[tool.setuptools]
+packages = ["acl_loop"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+acl_loop = [
+  "resources/config/*.yaml",
+  "resources/schemas/*.json",
+  "resources/templates/*.json",
+  "resources/templates/*.md",
+  "resources/skill/autonomous-completion-loop/*.md",
+  "resources/skill/autonomous-completion-loop/assets/*.md",
+  "resources/skill/autonomous-completion-loop/references/*.md",
+  "resources/skill/autonomous-completion-loop/scripts/*.py",
+]

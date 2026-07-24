@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/hunter548686-source/evidenceloop/main/schemas/source-registry.schema.json",
+  "title": "External Source Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "sources"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question",
+          "claim",
+          "source_title",
+          "source_url",
+          "publisher",
+          "source_type",
+          "published_at",
+          "retrieved_at",
+          "applicable_version",
+          "evidence_summary",
+          "confidence",
+          "local_validation",
+          "limitations"
+        ],
+        "properties": {
+          "question": { "type": "string", "minLength": 1 },
+          "claim": { "type": "string", "minLength": 1 },
+          "source_title": { "type": "string", "minLength": 1 },
+          "source_url": { "type": "string", "format": "uri", "pattern": "^https?://" },
+          "publisher": { "type": "string", "minLength": 1 },
+          "source_type": { "type": "string", "minLength": 1 },
+          "published_at": { "type": ["string", "null"], "format": "date-time" },
+          "retrieved_at": { "type": "string", "format": "date-time" },
+          "applicable_version": { "type": "string", "minLength": 1 },
+          "evidence_summary": { "type": "string", "minLength": 1 },
+          "confidence": { "enum": ["low", "medium", "high"] },
+          "local_validation": { "enum": ["pending", "passed", "failed"] },
+          "limitations": { "type": "string" }
+        }
+      }
+    }
+  }
+}
