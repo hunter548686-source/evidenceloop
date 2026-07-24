@@ -130,6 +130,7 @@ No failure remains unexplained:
 - Shell substitution malformed the first Issue bodies and unintentionally reran the test suite; all five bodies were replaced from literal files and verified exactly through the GitHub API.
 - A Python f-string scan syntax error was corrected without changing the application documents.
 - A zsh `path` variable invalidated one remote-check attempt; its empty-value results were discarded, and the complete check was rerun with non-empty SHA assertions.
+- The final Release-body contract check found that the explicit `standard-library-only` wording was missing; the tracked notes and live GitHub Release were corrected before final acceptance.
 
 ## Rollback
 
